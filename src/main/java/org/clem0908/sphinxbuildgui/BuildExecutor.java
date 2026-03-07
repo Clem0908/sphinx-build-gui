@@ -5,9 +5,16 @@ import javafx.scene.control.TextArea;
 
 import java.io.*;
 
+import java.util.Locale;
+import java.util.ResourceBundle;
+
 public class BuildExecutor {
 
     public static void executeBuild(String dir, String target, TextArea terminal) {
+
+	Locale currentLocale;
+	currentLocale = Locale.getDefault();
+	ResourceBundle messages = ResourceBundle.getBundle("org.clem0908.sphinxbuildgui.MessagesBundle", currentLocale);
 
         new Thread(() -> {
             try {
@@ -30,7 +37,7 @@ public class BuildExecutor {
 
             } catch (Exception e) {
                 Platform.runLater(() ->
-                        terminal.appendText("Build failed: " + e.getMessage() + "\n"));
+                        terminal.appendText(messages.getString("publishFailed") + e.getMessage() + "\n"));
             }
         }).start();
     }

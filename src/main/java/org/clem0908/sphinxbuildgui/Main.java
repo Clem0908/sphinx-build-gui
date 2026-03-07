@@ -11,7 +11,7 @@ public class Main extends Application {
         Controller controller = new Controller(stage);
         Scene scene = new Scene(controller.getRoot(), 1000, 700);
 
-        stage.setTitle("Sphinx Documentation Builder GUI");
+        stage.setTitle("Sphinx Build GUI");
         stage.setScene(scene);
         stage.show();
     }

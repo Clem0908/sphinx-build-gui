@@ -130,7 +130,7 @@ public class Controller {
 private void openHtml() {
     String dir = directoryField.getText();
     if (dir == null || dir.isEmpty()) {
-        terminalArea.appendText("Please select a documentation directory.\n");
+        terminalArea.appendText(this.getMessages().getString("selectDocumentationDirectory"));
         return;
     }
 
@@ -153,11 +153,11 @@ private void openHtml() {
 
             process.waitFor();
             javafx.application.Platform.runLater(() ->
-                    terminalArea.appendText("Finished: make open-html\n"));
+                    terminalArea.appendText(this.getMessages().getString("webBrowserClosed")));
 
         } catch (Exception e) {
             javafx.application.Platform.runLater(() ->
-                    terminalArea.appendText("Error running make open-html: " + e.getMessage() + "\n"));
+                    terminalArea.appendText(this.getMessages().getString("errorWebBrowser") + e.getMessage() + "\n"));
         }
     }).start();
 }
@@ -165,7 +165,7 @@ private void openHtml() {
 private void openPdf() {
     String dir = directoryField.getText();
     if (dir == null || dir.isEmpty()) {
-        terminalArea.appendText("Please select a documentation directory.\n");
+        terminalArea.appendText(this.getMessages().getString("selectDocumentationDirectory"));
         return;
     }
 
@@ -188,11 +188,11 @@ private void openPdf() {
 
             process.waitFor();
             javafx.application.Platform.runLater(() ->
-                    terminalArea.appendText("Finished: make open-pdf\n"));
+                    terminalArea.appendText(this.getMessages().getString("pdfViewerClosed")));
 
         } catch (Exception e) {
             javafx.application.Platform.runLater(() ->
-                    terminalArea.appendText("Error running make open-pdf: " + e.getMessage() + "\n"));
+                    terminalArea.appendText(this.getMessages().getString("errorPDFViewer") + e.getMessage() + "\n"));
         }
     }).start();
 }
