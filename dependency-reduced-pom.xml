@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.example</groupId>
+  <groupId>org.clem0908</groupId>
   <artifactId>sphinx-build-gui</artifactId>
   <version>1.1</version>
   <build>
@@ -22,7 +22,7 @@
             <configuration>
               <transformers>
                 <transformer>
-                  <mainClass>com.example.sphinxgui.Launcher</mainClass>
+                  <mainClass>org.clem0908.sphinxbuildgui.Launcher</mainClass>
                 </transformer>
               </transformers>
             </configuration>
@@ -39,7 +39,7 @@
           <destination>${project.build.directory}/dist</destination>
           <input>${project.build.directory}</input>
           <mainJar>${project.build.finalName}.jar</mainJar>
-          <mainClass>com.example.sphinxgui.Launcher</mainClass>
+          <mainClass>org.clem0908.sphinxbuildgui.Launcher</mainClass>
           <type>APP_IMAGE</type>
           <vendor>Clem0908</vendor>
         </configuration>

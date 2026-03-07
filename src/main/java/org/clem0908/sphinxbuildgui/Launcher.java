@@ -1,4 +1,4 @@
-package com.example.sphinxgui;
+package org.clem0908.sphinxbuildgui;
 
 public class Launcher {
 

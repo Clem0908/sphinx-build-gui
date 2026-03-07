@@ -1,4 +1,4 @@
-package com.example.sphinxgui;
+package org.clem0908.sphinxbuildgui;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -31,7 +31,7 @@ public class Controller {
     public Controller(Stage stage) {
 	Locale currentLocale;
 	currentLocale = Locale.getDefault();
-	this.messages = ResourceBundle.getBundle("com.example.sphinxgui.MessagesBundle", currentLocale);
+	this.messages = ResourceBundle.getBundle("org.clem0908.sphinxbuildgui.MessagesBundle", currentLocale);
 
         this.stage = stage;
         buildUI();
