@@ -23,7 +23,7 @@ public class Controller {
     private TextField directoryField = new TextField();
     private TextArea terminalArea = new TextArea();
     private ComboBox<String> targetSelector = new ComboBox<>();
-    private Label versionStatus = new Label("Template version: Unknown");
+    private Label versionStatus;
     private ResourceBundle messages;
 
     private Stage stage;
@@ -32,6 +32,7 @@ public class Controller {
 	Locale currentLocale;
 	currentLocale = Locale.getDefault();
 	this.messages = ResourceBundle.getBundle("org.clem0908.sphinxbuildgui.MessagesBundle", currentLocale);
+	this.versionStatus = new Label(this.messages.getString("templateVersionUnknownText"));
 
         this.stage = stage;
         buildUI();
@@ -50,7 +51,7 @@ public class Controller {
         root.setPadding(new Insets(10));
 
         // Directory selection
-        Button browseBtn = new Button("Change Documentation Directory");
+        Button browseBtn = new Button(this.getMessages().getString("changeDocumentationDirectoryButton"));
         browseBtn.setOnAction(e -> chooseDirectory());
 
         directoryField.setPrefWidth(600);
@@ -58,7 +59,7 @@ public class Controller {
         HBox dirBox = new HBox(10, directoryField, browseBtn);
 
         // Template check
-        Button checkVersionBtn = new Button("Check Template Version");
+        Button checkVersionBtn = new Button(this.getMessages().getString("checkTemplateButton"));
         checkVersionBtn.setOnAction(e -> checkVersion());
 
         // Build targets
@@ -78,20 +79,20 @@ public class Controller {
         buildBtn.setOnAction(e -> build());
 
 	HBox buildBox = new HBox(10,
-		new Label("Target:"), targetSelector,
+		new Label(this.getMessages().getString("action")), targetSelector,
 		buildBtn);
         // Terminal
         terminalArea.setEditable(false);
         terminalArea.setPrefHeight(350);
 
         // Open buttons
-        Button openHtmlBtn = new Button("Open HTML");
+        Button openHtmlBtn = new Button(this.getMessages().getString("openHTML"));
         openHtmlBtn.setOnAction(e -> openHtml());
 
-        Button openPdfBtn = new Button("Open PDF");
+        Button openPdfBtn = new Button(this.getMessages().getString("openPDF"));
         openPdfBtn.setOnAction(e -> openPdf());
 
-        Button quitBtn = new Button("Quit");
+        Button quitBtn = new Button(this.getMessages().getString("exit"));
         quitBtn.setOnAction(e -> Platform.exit());
 
         HBox openBox = new HBox(10, openHtmlBtn, openPdfBtn, quitBtn);
