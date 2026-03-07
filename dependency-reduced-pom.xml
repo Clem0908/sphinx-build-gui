@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.example</groupId>
   <artifactId>sphinx-build-gui</artifactId>
-  <version>1.0</version>
+  <version>1.1</version>
   <build>
     <plugins>
       <plugin>
@@ -35,13 +35,13 @@
         <version>1.6.0</version>
         <configuration>
           <name>sphinx-build-gui</name>
-          <appVersion>1.0</appVersion>
+          <appVersion>1.1</appVersion>
           <destination>${project.build.directory}/dist</destination>
           <input>${project.build.directory}</input>
           <mainJar>${project.build.finalName}.jar</mainJar>
           <mainClass>com.example.sphinxgui.Launcher</mainClass>
           <type>APP_IMAGE</type>
-          <vendor>YourName</vendor>
+          <vendor>Clem0908</vendor>
         </configuration>
       </plugin>
     </plugins>

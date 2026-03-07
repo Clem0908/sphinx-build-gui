@@ -14,6 +14,9 @@ import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
+import java.util.Locale;
+import java.util.ResourceBundle;
+
 public class Controller {
 
     private VBox root = new VBox(10);
@@ -21,16 +24,25 @@ public class Controller {
     private TextArea terminalArea = new TextArea();
     private ComboBox<String> targetSelector = new ComboBox<>();
     private Label versionStatus = new Label("Template version: Unknown");
+    private ResourceBundle messages;
 
     private Stage stage;
 
-       public Controller(Stage stage) {
+    public Controller(Stage stage) {
+	Locale currentLocale;
+	currentLocale = Locale.getDefault();
+	this.messages = ResourceBundle.getBundle("com.example.sphinxgui.MessagesBundle", currentLocale);
+
         this.stage = stage;
         buildUI();
     }
 
     public Parent getRoot() {
         return root;
+    }
+
+    private ResourceBundle getMessages() {
+	return this.messages;
     }
 
     private void buildUI() {
@@ -62,7 +74,7 @@ public class Controller {
 	);
 	targetSelector.setValue("html-fr");	
 
-        Button buildBtn = new Button("Build");
+        Button buildBtn = new Button(this.getMessages().getString("buildButton"));
         buildBtn.setOnAction(e -> build());
 
 	HBox buildBox = new HBox(10,
