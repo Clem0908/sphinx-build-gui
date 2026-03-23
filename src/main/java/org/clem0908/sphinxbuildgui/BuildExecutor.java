@@ -1,7 +1,6 @@
 package org.clem0908.sphinxbuildgui;
 
 import javafx.application.Platform;
-import javafx.scene.control.TextArea;
 
 import java.io.*;
 
@@ -10,7 +9,7 @@ import java.util.ResourceBundle;
 
 public class BuildExecutor {
 
-    public static void executeBuild(String dir, String target, TextArea terminal) {
+    public static void executeBuild(String dir, String target, AnsiTextArea terminal) {
 
 	Locale currentLocale;
 	currentLocale = Locale.getDefault();

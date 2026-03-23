@@ -21,7 +21,7 @@ public class Controller {
 
     private VBox root = new VBox(10);
     private TextField directoryField = new TextField();
-    private TextArea terminalArea = new TextArea();
+    private AnsiTextArea terminalArea = new AnsiTextArea();
     private ComboBox<String> targetSelector = new ComboBox<>();
     private Label versionStatus;
     private ResourceBundle messages;
