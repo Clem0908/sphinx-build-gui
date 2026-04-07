@@ -9,7 +9,6 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -23,7 +22,6 @@ public class Controller {
     private TextField directoryField = new TextField();
     private TextField templateDirectoryField = new TextField();
     private AnsiTextArea terminalArea = new AnsiTextArea();
-    private ComboBox<String> targetSelector = new ComboBox<>();
     private Label versionStatus;
     private Label templateDirVersionStatus;
     private Button checkVersionBtn;
@@ -62,9 +60,7 @@ public class Controller {
         // Documentation directory selection
         Button browseBtn = new Button(this.getMessages().getString("changeDocumentationDirectoryButton"));
         browseBtn.setOnAction(e -> chooseDirectory());
-
         directoryField.setPrefWidth(600);
-
         HBox dirBox = new HBox(10, directoryField, browseBtn);
 
         // Documentation template check
@@ -74,39 +70,105 @@ public class Controller {
         // Template directory selection
         Button browseTemplateBtn = new Button(this.getMessages().getString("changeTemplateFolderButton"));
         browseTemplateBtn.setOnAction(e -> chooseTemplateDirectory());
-
         templateDirectoryField.setPrefWidth(600);
-
         HBox templateDirBox = new HBox(10, templateDirectoryField, browseTemplateBtn);
 
         // Template directory version check
         checkTemplateDirVersionBtn = new Button(this.getMessages().getString("checkTemplateFolderVersionButton"));
         checkTemplateDirVersionBtn.setOnAction(e -> toggleTemplateDirVersion());
 
-        // Build targets
-	targetSelector.getItems().addAll(
-		"html-fr",
-		"html-en",
-		"pdf-fr",
-		"pdf-en",
-		"pdf-fr-fast",
-		"pdf-en-fast",
-		"pot",
-		"po"
-	);
-	targetSelector.setValue("html-fr");	
+        // Left column: directory controls + template version controls
+        VBox leftBox = new VBox(10,
+            dirBox,
+            checkVersionBtn,
+            versionStatus,
+            templateDirBox,
+            checkTemplateDirVersionBtn,
+            templateDirVersionStatus
+        );
 
-        Button buildBtn = new Button(this.getMessages().getString("buildButton"));
-        buildBtn.setOnAction(e -> build());
+        // Zone FR: html-fr, pdf-fr, pdf-fr-fast
+        ToggleGroup frGroup = new ToggleGroup();
+        RadioButton frHtml = new RadioButton("html-fr");
+        RadioButton frPdf = new RadioButton("pdf-fr");
+        RadioButton frPdfFast = new RadioButton("pdf-fr-fast");
+        frHtml.setToggleGroup(frGroup);
+        frPdf.setToggleGroup(frGroup);
+        frPdfFast.setToggleGroup(frGroup);
+        frHtml.setSelected(true);
+        Button frBuildBtn = new Button(this.getMessages().getString("buildButton"));
+        frBuildBtn.setOnAction(e -> {
+            RadioButton sel = (RadioButton) frGroup.getSelectedToggle();
+            if (sel != null) buildWithTarget(sel.getText());
+        });
+        Button openHtmlFrBtn = new Button(this.getMessages().getString("openHTMLFr"));
+        openHtmlFrBtn.setOnAction(e -> openHtmlLocale("fr"));
+        Button openPdfFrBtn = new Button(this.getMessages().getString("openPDFFr"));
+        openPdfFrBtn.setOnAction(e -> openPdfLocale("fr"));
+        VBox frContent = new VBox(6,
+            new HBox(10, new Label(this.getMessages().getString("action")), frHtml, frPdf, frPdfFast, frBuildBtn),
+            openHtmlFrBtn,
+            openPdfFrBtn
+        );
+        TitledPane frPane = new TitledPane(this.getMessages().getString("zoneFrTitle"), frContent);
+        frPane.setCollapsible(false);
 
-	HBox buildBox = new HBox(10,
-		new Label(this.getMessages().getString("action")), targetSelector,
-		buildBtn);
+        // Zone PO/POT: pot, po
+        ToggleGroup poGroup = new ToggleGroup();
+        RadioButton poPot = new RadioButton("pot");
+        RadioButton poPo = new RadioButton("po");
+        poPot.setToggleGroup(poGroup);
+        poPo.setToggleGroup(poGroup);
+        poPot.setSelected(true);
+        Button poBuildBtn = new Button(this.getMessages().getString("buildButton"));
+        poBuildBtn.setOnAction(e -> {
+            RadioButton sel = (RadioButton) poGroup.getSelectedToggle();
+            if (sel != null) buildWithTarget(sel.getText());
+        });
+        Button openDocsPoBtn = new Button(this.getMessages().getString("openDocsPo"));
+        openDocsPoBtn.setOnAction(e -> openFileWithDesktop("source/locale/en/LC_MESSAGES/docs.po"));
+        VBox poContent = new VBox(6,
+            new HBox(10, new Label(this.getMessages().getString("action")), poPot, poPo, poBuildBtn),
+            openDocsPoBtn
+        );
+        TitledPane poPane = new TitledPane(this.getMessages().getString("zonePoTitle"), poContent);
+        poPane.setCollapsible(false);
+
+        // Zone EN: html-en, pdf-en, pdf-en-fast
+        ToggleGroup enGroup = new ToggleGroup();
+        RadioButton enHtml = new RadioButton("html-en");
+        RadioButton enPdf = new RadioButton("pdf-en");
+        RadioButton enPdfFast = new RadioButton("pdf-en-fast");
+        enHtml.setToggleGroup(enGroup);
+        enPdf.setToggleGroup(enGroup);
+        enPdfFast.setToggleGroup(enGroup);
+        enHtml.setSelected(true);
+        Button enBuildBtn = new Button(this.getMessages().getString("buildButton"));
+        enBuildBtn.setOnAction(e -> {
+            RadioButton sel = (RadioButton) enGroup.getSelectedToggle();
+            if (sel != null) buildWithTarget(sel.getText());
+        });
+        Button openHtmlEnBtn = new Button(this.getMessages().getString("openHTMLEn"));
+        openHtmlEnBtn.setOnAction(e -> openHtmlLocale("en"));
+        Button openPdfEnBtn = new Button(this.getMessages().getString("openPDFEn"));
+        openPdfEnBtn.setOnAction(e -> openPdfLocale("en"));
+        VBox enContent = new VBox(6,
+            new HBox(10, new Label(this.getMessages().getString("action")), enHtml, enPdf, enPdfFast, enBuildBtn),
+            openHtmlEnBtn,
+            openPdfEnBtn
+        );
+        TitledPane enPane = new TitledPane(this.getMessages().getString("zoneEnTitle"), enContent);
+        enPane.setCollapsible(false);
+
+        VBox rightBox = new VBox(10, frPane, poPane, enPane);
+
+        HBox mainContent = new HBox(20, leftBox, rightBox);
+
         // Terminal
         terminalArea.setEditable(false);
         terminalArea.setPrefHeight(350);
 
-        // Open buttons
+        // Bottom bar
         Button openHtmlBtn = new Button(this.getMessages().getString("openHTML"));
         openHtmlBtn.setOnAction(e -> openHtml());
 
@@ -119,24 +181,15 @@ public class Controller {
         Button openRstcheckLogBtn = new Button(this.getMessages().getString("openRstcheckLog"));
         openRstcheckLogBtn.setOnAction(e -> openFileWithDesktop("rstcheck.log"));
 
-        Button openDocsPoBtn = new Button(this.getMessages().getString("openDocsPo"));
-        openDocsPoBtn.setOnAction(e -> openFileWithDesktop("source/locale/en/LC_MESSAGES/docs.po"));
-
         Button quitBtn = new Button(this.getMessages().getString("exit"));
         quitBtn.setOnAction(e -> Platform.exit());
 
-        HBox openBox = new HBox(10, openHtmlBtn, openPdfBtn, openWarningLogBtn, openRstcheckLogBtn, openDocsPoBtn, quitBtn);
+        HBox openBox = new HBox(10, openHtmlBtn, openPdfBtn, openWarningLogBtn, openRstcheckLogBtn, quitBtn);
 
         root.getChildren().addAll(
-                dirBox,
-                checkVersionBtn,
-                versionStatus,
-                templateDirBox,
-                checkTemplateDirVersionBtn,
-                templateDirVersionStatus,
-                buildBox,
-                terminalArea,
-                openBox
+            mainContent,
+            terminalArea,
+            openBox
         );
     }
 
@@ -184,10 +237,59 @@ public class Controller {
         }
     }
 
-    private void build() {
+    private void buildWithTarget(String target) {
         String dir = directoryField.getText();
-        String target = targetSelector.getValue();
         BuildExecutor.executeBuild(dir, target, terminalArea);
+    }
+
+    private void openHtmlLocale(String locale) {
+        String dir = directoryField.getText();
+        if (dir == null || dir.isEmpty()) {
+            terminalArea.appendText(this.getMessages().getString("selectDocumentationDirectory"));
+            return;
+        }
+        new Thread(() -> {
+            Path target = Paths.get(dir, "build", locale, "html", "index.html");
+            if (!Files.exists(target)) {
+                Platform.runLater(() -> terminalArea.appendText(
+                    this.getMessages().getString("fileNotFound") + " " + target + "\n"));
+                return;
+            }
+            try {
+                new ProcessBuilder("xdg-open", target.toString())
+                    .redirectErrorStream(true).start().waitFor();
+            } catch (Exception e) {
+                Platform.runLater(() ->
+                    terminalArea.appendText(this.getMessages().getString("errorWebBrowser") + e.getMessage() + "\n"));
+            }
+        }).start();
+    }
+
+    private void openPdfLocale(String locale) {
+        String dir = directoryField.getText();
+        if (dir == null || dir.isEmpty()) {
+            terminalArea.appendText(this.getMessages().getString("selectDocumentationDirectory"));
+            return;
+        }
+        new Thread(() -> {
+            try {
+                Path latexDir = Paths.get(dir, "build", locale, "latex");
+                java.util.List<Path> targets = Files.walk(latexDir, 1)
+                    .filter(p -> p.getFileName().toString().endsWith(".pdf"))
+                    .collect(java.util.stream.Collectors.toList());
+                if (targets.isEmpty()) {
+                    Platform.runLater(() -> terminalArea.appendText(
+                        this.getMessages().getString("fileNotFound") + " build/" + locale + "/latex/*.pdf\n"));
+                    return;
+                }
+                for (Path t : targets)
+                    new ProcessBuilder("xdg-open", t.toString())
+                        .redirectErrorStream(true).start().waitFor();
+            } catch (Exception e) {
+                Platform.runLater(() ->
+                    terminalArea.appendText(this.getMessages().getString("errorPDFViewer") + e.getMessage() + "\n"));
+            }
+        }).start();
     }
 
 private void openHtml() {
