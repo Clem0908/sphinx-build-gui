@@ -26,6 +26,8 @@ public class Controller {
     private ComboBox<String> targetSelector = new ComboBox<>();
     private Label versionStatus;
     private Label templateDirVersionStatus;
+    private Button checkVersionBtn;
+    private Button checkTemplateDirVersionBtn;
     private ResourceBundle messages;
 
     private Stage stage;
@@ -35,7 +37,11 @@ public class Controller {
 	currentLocale = Locale.getDefault();
 	this.messages = ResourceBundle.getBundle("org.clem0908.sphinxbuildgui.MessagesBundle", currentLocale);
 	this.versionStatus = new Label(this.messages.getString("templateVersionUnknownText"));
+	this.versionStatus.setVisible(false);
+	this.versionStatus.setManaged(false);
 	this.templateDirVersionStatus = new Label(this.messages.getString("templateVersionUnknownText"));
+	this.templateDirVersionStatus.setVisible(false);
+	this.templateDirVersionStatus.setManaged(false);
 
         this.stage = stage;
         buildUI();
@@ -62,8 +68,8 @@ public class Controller {
         HBox dirBox = new HBox(10, directoryField, browseBtn);
 
         // Documentation template check
-        Button checkVersionBtn = new Button(this.getMessages().getString("checkTemplateButton"));
-        checkVersionBtn.setOnAction(e -> checkVersion());
+        checkVersionBtn = new Button(this.getMessages().getString("checkTemplateButton"));
+        checkVersionBtn.setOnAction(e -> toggleVersion());
 
         // Template directory selection
         Button browseTemplateBtn = new Button(this.getMessages().getString("changeTemplateFolderButton"));
@@ -74,8 +80,8 @@ public class Controller {
         HBox templateDirBox = new HBox(10, templateDirectoryField, browseTemplateBtn);
 
         // Template directory version check
-        Button checkTemplateDirVersionBtn = new Button(this.getMessages().getString("checkTemplateFolderVersionButton"));
-        checkTemplateDirVersionBtn.setOnAction(e -> checkTemplateDirVersion());
+        checkTemplateDirVersionBtn = new Button(this.getMessages().getString("checkTemplateFolderVersionButton"));
+        checkTemplateDirVersionBtn.setOnAction(e -> toggleTemplateDirVersion());
 
         // Build targets
 	targetSelector.getItems().addAll(
@@ -150,16 +156,32 @@ public class Controller {
         }
     }
 
-    private void checkVersion() {
-        String dir = directoryField.getText();
-        String result = VersionChecker.checkTemplateVersion(dir);
-        versionStatus.setText(result);
+    private void toggleVersion() {
+        if (versionStatus.isVisible()) {
+            versionStatus.setVisible(false);
+            versionStatus.setManaged(false);
+            checkVersionBtn.setText(this.getMessages().getString("checkTemplateButton"));
+        } else {
+            String result = VersionChecker.checkTemplateVersion(directoryField.getText());
+            versionStatus.setText(result);
+            versionStatus.setVisible(true);
+            versionStatus.setManaged(true);
+            checkVersionBtn.setText(this.getMessages().getString("hideTemplateButton"));
+        }
     }
 
-    private void checkTemplateDirVersion() {
-        String dir = templateDirectoryField.getText();
-        String result = VersionChecker.checkTemplateVersion(dir);
-        templateDirVersionStatus.setText(result);
+    private void toggleTemplateDirVersion() {
+        if (templateDirVersionStatus.isVisible()) {
+            templateDirVersionStatus.setVisible(false);
+            templateDirVersionStatus.setManaged(false);
+            checkTemplateDirVersionBtn.setText(this.getMessages().getString("checkTemplateFolderVersionButton"));
+        } else {
+            String result = VersionChecker.checkTemplateVersion(templateDirectoryField.getText());
+            templateDirVersionStatus.setText(result);
+            templateDirVersionStatus.setVisible(true);
+            templateDirVersionStatus.setManaged(true);
+            checkTemplateDirVersionBtn.setText(this.getMessages().getString("hideTemplateFolderVersionButton"));
+        }
     }
 
     private void build() {
