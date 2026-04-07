@@ -9,10 +9,10 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
-
 import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -21,9 +21,11 @@ public class Controller {
 
     private VBox root = new VBox(10);
     private TextField directoryField = new TextField();
+    private TextField templateDirectoryField = new TextField();
     private AnsiTextArea terminalArea = new AnsiTextArea();
     private ComboBox<String> targetSelector = new ComboBox<>();
     private Label versionStatus;
+    private Label templateDirVersionStatus;
     private ResourceBundle messages;
 
     private Stage stage;
@@ -33,6 +35,7 @@ public class Controller {
 	currentLocale = Locale.getDefault();
 	this.messages = ResourceBundle.getBundle("org.clem0908.sphinxbuildgui.MessagesBundle", currentLocale);
 	this.versionStatus = new Label(this.messages.getString("templateVersionUnknownText"));
+	this.templateDirVersionStatus = new Label(this.messages.getString("templateVersionUnknownText"));
 
         this.stage = stage;
         buildUI();
@@ -50,7 +53,7 @@ public class Controller {
 
         root.setPadding(new Insets(10));
 
-        // Directory selection
+        // Documentation directory selection
         Button browseBtn = new Button(this.getMessages().getString("changeDocumentationDirectoryButton"));
         browseBtn.setOnAction(e -> chooseDirectory());
 
@@ -58,9 +61,21 @@ public class Controller {
 
         HBox dirBox = new HBox(10, directoryField, browseBtn);
 
-        // Template check
+        // Documentation template check
         Button checkVersionBtn = new Button(this.getMessages().getString("checkTemplateButton"));
         checkVersionBtn.setOnAction(e -> checkVersion());
+
+        // Template directory selection
+        Button browseTemplateBtn = new Button(this.getMessages().getString("changeTemplateFolderButton"));
+        browseTemplateBtn.setOnAction(e -> chooseTemplateDirectory());
+
+        templateDirectoryField.setPrefWidth(600);
+
+        HBox templateDirBox = new HBox(10, templateDirectoryField, browseTemplateBtn);
+
+        // Template directory version check
+        Button checkTemplateDirVersionBtn = new Button(this.getMessages().getString("checkTemplateFolderVersionButton"));
+        checkTemplateDirVersionBtn.setOnAction(e -> checkTemplateDirVersion());
 
         // Build targets
 	targetSelector.getItems().addAll(
@@ -92,15 +107,27 @@ public class Controller {
         Button openPdfBtn = new Button(this.getMessages().getString("openPDF"));
         openPdfBtn.setOnAction(e -> openPdf());
 
+        Button openWarningLogBtn = new Button(this.getMessages().getString("openWarningLog"));
+        openWarningLogBtn.setOnAction(e -> openFileWithDesktop("warning.log"));
+
+        Button openRstcheckLogBtn = new Button(this.getMessages().getString("openRstcheckLog"));
+        openRstcheckLogBtn.setOnAction(e -> openFileWithDesktop("rstcheck.log"));
+
+        Button openDocsPoBtn = new Button(this.getMessages().getString("openDocsPo"));
+        openDocsPoBtn.setOnAction(e -> openFileWithDesktop("source/locale/en/LC_MESSAGES/docs.po"));
+
         Button quitBtn = new Button(this.getMessages().getString("exit"));
         quitBtn.setOnAction(e -> Platform.exit());
 
-        HBox openBox = new HBox(10, openHtmlBtn, openPdfBtn, quitBtn);
+        HBox openBox = new HBox(10, openHtmlBtn, openPdfBtn, openWarningLogBtn, openRstcheckLogBtn, openDocsPoBtn, quitBtn);
 
         root.getChildren().addAll(
                 dirBox,
                 checkVersionBtn,
                 versionStatus,
+                templateDirBox,
+                checkTemplateDirVersionBtn,
+                templateDirVersionStatus,
                 buildBox,
                 terminalArea,
                 openBox
@@ -115,10 +142,24 @@ public class Controller {
         }
     }
 
+    private void chooseTemplateDirectory() {
+        DirectoryChooser chooser = new DirectoryChooser();
+        File dir = chooser.showDialog(stage);
+        if (dir != null) {
+            templateDirectoryField.setText(dir.getAbsolutePath());
+        }
+    }
+
     private void checkVersion() {
         String dir = directoryField.getText();
         String result = VersionChecker.checkTemplateVersion(dir);
-	versionStatus.setText(result);
+        versionStatus.setText(result);
+    }
+
+    private void checkTemplateDirVersion() {
+        String dir = templateDirectoryField.getText();
+        String result = VersionChecker.checkTemplateVersion(dir);
+        templateDirVersionStatus.setText(result);
     }
 
     private void build() {
@@ -136,27 +177,22 @@ private void openHtml() {
 
     new Thread(() -> {
         try {
-            ProcessBuilder pb = new ProcessBuilder("make", "open-html");
-            pb.directory(new File(dir));
-            pb.redirectErrorStream(true); // fusion stdout/stderr
-            Process process = pb.start();
-
-            // Lire la sortie du process et l’afficher dans le terminal
-            try (BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream()))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    final String msg = line + "\n";
-                    javafx.application.Platform.runLater(() -> terminalArea.appendText(msg));
-                }
+            Path buildDir = Paths.get(dir, "build");
+            java.util.List<Path> targets = Files.walk(buildDir, 3)
+                .filter(p -> p.getFileName().toString().equals("index.html")
+                          && p.getParent().getFileName().toString().equals("html")
+                          && p.getParent().getParent().getFileName().toString().matches("[a-z]{2}"))
+                .collect(java.util.stream.Collectors.toList());
+            if (targets.isEmpty()) {
+                Platform.runLater(() -> terminalArea.appendText(
+                    this.getMessages().getString("fileNotFound") + " build/*/html/index.html\n"));
+                return;
             }
-
-            process.waitFor();
-            javafx.application.Platform.runLater(() ->
-                    terminalArea.appendText(this.getMessages().getString("webBrowserClosed")));
-
+            for (Path t : targets)
+                new ProcessBuilder("xdg-open", t.toString())
+                    .redirectErrorStream(true).start().waitFor();
         } catch (Exception e) {
-            javafx.application.Platform.runLater(() ->
+            Platform.runLater(() ->
                     terminalArea.appendText(this.getMessages().getString("errorWebBrowser") + e.getMessage() + "\n"));
         }
     }).start();
@@ -171,28 +207,51 @@ private void openPdf() {
 
     new Thread(() -> {
         try {
-            ProcessBuilder pb = new ProcessBuilder("make", "open-pdf");
-            pb.directory(new File(dir));
-            pb.redirectErrorStream(true); // fusion stdout/stderr
-            Process process = pb.start();
-
-            // Lire la sortie du process et l’afficher dans le terminal
-            try (BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream()))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    final String msg = line + "\n";
-                    javafx.application.Platform.runLater(() -> terminalArea.appendText(msg));
-                }
+            Path buildDir = Paths.get(dir, "build");
+            java.util.List<Path> targets = Files.walk(buildDir, 3)
+                .filter(p -> p.getFileName().toString().endsWith(".pdf")
+                          && p.getParent().getFileName().toString().equals("latex")
+                          && p.getParent().getParent().getFileName().toString().matches("[a-z]{2}"))
+                .collect(java.util.stream.Collectors.toList());
+            if (targets.isEmpty()) {
+                Platform.runLater(() -> terminalArea.appendText(
+                    this.getMessages().getString("fileNotFound") + " build/*/latex/*.pdf\n"));
+                return;
             }
+            java.util.List<Process> procs = new java.util.ArrayList<>();
+            for (Path t : targets)
+                procs.add(new ProcessBuilder("xdg-open", t.toString())
+                    .redirectErrorStream(true).start());
+            for (Process p : procs) p.waitFor();
+        } catch (Exception e) {
+            Platform.runLater(() ->
+                    terminalArea.appendText(this.getMessages().getString("errorPDFViewer") + e.getMessage() + "\n"));
+        }
+    }).start();
+}
 
+private void openFileWithDesktop(String relativePath) {
+    String dir = directoryField.getText();
+    if (dir == null || dir.isEmpty()) {
+        terminalArea.appendText(this.getMessages().getString("selectDocumentationDirectory"));
+        return;
+    }
+
+    File file = new File(dir, relativePath);
+    if (!file.exists()) {
+        terminalArea.appendText(this.getMessages().getString("fileNotFound") + " " + file.getAbsolutePath() + "\n");
+        return;
+    }
+
+    new Thread(() -> {
+        try {
+            ProcessBuilder pb = new ProcessBuilder("xdg-open", file.getAbsolutePath());
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
             process.waitFor();
-            javafx.application.Platform.runLater(() ->
-                    terminalArea.appendText(this.getMessages().getString("pdfViewerClosed")));
-
         } catch (Exception e) {
             javafx.application.Platform.runLater(() ->
-                    terminalArea.appendText(this.getMessages().getString("errorPDFViewer") + e.getMessage() + "\n"));
+                terminalArea.appendText(this.getMessages().getString("errorOpeningFile") + " " + e.getMessage() + "\n"));
         }
     }).start();
 }
