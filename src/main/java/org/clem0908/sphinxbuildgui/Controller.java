@@ -77,15 +77,18 @@ public class Controller {
         checkTemplateDirVersionBtn = new Button(this.getMessages().getString("checkTemplateFolderVersionButton"));
         checkTemplateDirVersionBtn.setOnAction(e -> toggleTemplateDirVersion());
 
+        // Zone Documentation directory
+        VBox docContent = new VBox(6, dirBox, checkVersionBtn, versionStatus);
+        TitledPane docPane = new TitledPane(this.getMessages().getString("zoneDocTitle"), docContent);
+        docPane.setCollapsible(false);
+
+        // Zone Template folder
+        VBox templateContent = new VBox(6, templateDirBox, checkTemplateDirVersionBtn, templateDirVersionStatus);
+        TitledPane templatePane = new TitledPane(this.getMessages().getString("zoneTemplateTitle"), templateContent);
+        templatePane.setCollapsible(false);
+
         // Left column: directory controls + template version controls
-        VBox leftBox = new VBox(10,
-            dirBox,
-            checkVersionBtn,
-            versionStatus,
-            templateDirBox,
-            checkTemplateDirVersionBtn,
-            templateDirVersionStatus
-        );
+        VBox leftBox = new VBox(10, docPane, templatePane);
 
         // Zone FR: html-fr, pdf-fr, pdf-fr-fast
         ToggleGroup frGroup = new ToggleGroup();
@@ -120,7 +123,7 @@ public class Controller {
         poPot.setToggleGroup(poGroup);
         poPo.setToggleGroup(poGroup);
         poPot.setSelected(true);
-        Button poBuildBtn = new Button(this.getMessages().getString("buildButton"));
+        Button poBuildBtn = new Button(this.getMessages().getString("generateButton"));
         poBuildBtn.setOnAction(e -> {
             RadioButton sel = (RadioButton) poGroup.getSelectedToggle();
             if (sel != null) buildWithTarget(sel.getText());
