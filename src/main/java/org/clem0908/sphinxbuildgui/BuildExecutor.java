@@ -9,7 +9,7 @@ import java.util.ResourceBundle;
 
 public class BuildExecutor {
 
-    public static void executeBuild(String dir, String target, AnsiTextArea terminal) {
+    public static void executeBuild(String dir, String target, AnsiTextArea terminal, Runnable onFinish) {
 
 	Locale currentLocale;
 	currentLocale = Locale.getDefault();
@@ -37,6 +37,8 @@ public class BuildExecutor {
             } catch (Exception e) {
                 Platform.runLater(() ->
                         terminal.appendText(messages.getString("publishFailed") + e.getMessage() + "\n"));
+            } finally {
+                if (onFinish != null) Platform.runLater(onFinish);
             }
         }).start();
     }

@@ -29,7 +29,7 @@ public class VersionChecker {
 	currentLocale = Locale.getDefault();
 	ResourceBundle messages = ResourceBundle.getBundle("org.clem0908.sphinxbuildgui.MessagesBundle", currentLocale);
 
-        Set<String> versions = new HashSet<>();
+        List<String> versions = new ArrayList<>();
 
         for (String path : FILES) {
             try {

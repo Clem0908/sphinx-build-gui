@@ -11,7 +11,9 @@ public class Main extends Application {
         Controller controller = new Controller(stage);
         Scene scene = new Scene(controller.getRoot(), 1000, 700);
 
-        stage.setTitle("Sphinx Build GUI");
+        String version = Main.class.getPackage().getImplementationVersion();
+        stage.setTitle("Sphinx Build GUI" + (version != null ? " " + version : ""));
+        scene.getStylesheets().add(Main.class.getResource("style.css").toExternalForm());
         stage.setScene(scene);
         stage.show();
     }

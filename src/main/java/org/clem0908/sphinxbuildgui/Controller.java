@@ -22,10 +22,12 @@ public class Controller {
     private TextField directoryField = new TextField();
     private TextField templateDirectoryField = new TextField();
     private AnsiTextArea terminalArea = new AnsiTextArea();
-    private Label versionStatus;
-    private Label templateDirVersionStatus;
+    private TextArea versionStatus;
+    private TextArea templateDirVersionStatus;
     private Button checkVersionBtn;
     private Button checkTemplateDirVersionBtn;
+    private Button openWarningLogBtn;
+    private Button openRstcheckLogBtn;
     private ResourceBundle messages;
 
     private Stage stage;
@@ -34,10 +36,16 @@ public class Controller {
 	Locale currentLocale;
 	currentLocale = Locale.getDefault();
 	this.messages = ResourceBundle.getBundle("org.clem0908.sphinxbuildgui.MessagesBundle", currentLocale);
-	this.versionStatus = new Label(this.messages.getString("templateVersionUnknownText"));
+	this.versionStatus = new TextArea();
+	this.versionStatus.setEditable(false);
+	this.versionStatus.setWrapText(false);
+	this.versionStatus.setPrefHeight(150);
 	this.versionStatus.setVisible(false);
 	this.versionStatus.setManaged(false);
-	this.templateDirVersionStatus = new Label(this.messages.getString("templateVersionUnknownText"));
+	this.templateDirVersionStatus = new TextArea();
+	this.templateDirVersionStatus.setEditable(false);
+	this.templateDirVersionStatus.setWrapText(false);
+	this.templateDirVersionStatus.setPrefHeight(150);
 	this.templateDirVersionStatus.setVisible(false);
 	this.templateDirVersionStatus.setManaged(false);
 
@@ -55,7 +63,16 @@ public class Controller {
 
     private void buildUI() {
 
-        root.setPadding(new Insets(10));
+        root.setPadding(Insets.EMPTY);
+
+        // Header
+        String version = Main.class.getPackage().getImplementationVersion();
+        Label headerLabel = new Label("Sphinx Build GUI" + (version != null ? "  " + version : ""));
+        headerLabel.getStyleClass().add("app-header");
+        headerLabel.setMaxWidth(Double.MAX_VALUE);
+        HBox header = new HBox(headerLabel);
+        header.getStyleClass().add("app-header-bar");
+        HBox.setHgrow(headerLabel, javafx.scene.layout.Priority.ALWAYS);
 
         // Documentation directory selection
         Button browseBtn = new Button(this.getMessages().getString("changeDocumentationDirectoryButton"));
@@ -110,8 +127,7 @@ public class Controller {
         openPdfFrBtn.setOnAction(e -> openPdfLocale("fr"));
         VBox frContent = new VBox(6,
             new HBox(10, new Label(this.getMessages().getString("action")), frHtml, frPdf, frPdfFast, frBuildBtn),
-            openHtmlFrBtn,
-            openPdfFrBtn
+            new HBox(10, openHtmlFrBtn, openPdfFrBtn)
         );
         TitledPane frPane = new TitledPane(this.getMessages().getString("zoneFrTitle"), frContent);
         frPane.setCollapsible(false);
@@ -157,8 +173,7 @@ public class Controller {
         openPdfEnBtn.setOnAction(e -> openPdfLocale("en"));
         VBox enContent = new VBox(6,
             new HBox(10, new Label(this.getMessages().getString("action")), enHtml, enPdf, enPdfFast, enBuildBtn),
-            openHtmlEnBtn,
-            openPdfEnBtn
+            new HBox(10, openHtmlEnBtn, openPdfEnBtn)
         );
         TitledPane enPane = new TitledPane(this.getMessages().getString("zoneEnTitle"), enContent);
         enPane.setCollapsible(false);
@@ -171,33 +186,46 @@ public class Controller {
         terminalArea.setEditable(false);
         terminalArea.setPrefHeight(350);
 
-        // Bottom bar
-        Button openHtmlBtn = new Button(this.getMessages().getString("openHTML"));
-        openHtmlBtn.setOnAction(e -> openHtml());
-
-        Button openPdfBtn = new Button(this.getMessages().getString("openPDF"));
-        openPdfBtn.setOnAction(e -> openPdf());
-
-        Button openWarningLogBtn = new Button(this.getMessages().getString("openWarningLog"));
+        // Zone Debugging
+        openWarningLogBtn = new Button(this.getMessages().getString("openWarningLog"));
         openWarningLogBtn.setOnAction(e -> openFileWithDesktop("warning.log"));
+        openWarningLogBtn.setDisable(true);
 
-        Button openRstcheckLogBtn = new Button(this.getMessages().getString("openRstcheckLog"));
+        openRstcheckLogBtn = new Button(this.getMessages().getString("openRstcheckLog"));
         openRstcheckLogBtn.setOnAction(e -> openFileWithDesktop("rstcheck.log"));
+        openRstcheckLogBtn.setDisable(true);
 
+        VBox debugContent = new VBox(6, new HBox(10, openWarningLogBtn, openRstcheckLogBtn));
+        TitledPane debugPane = new TitledPane(this.getMessages().getString("zoneDebugTitle"), debugContent);
+        debugPane.setCollapsible(false);
+
+        // Bottom bar
         Button quitBtn = new Button(this.getMessages().getString("exit"));
         quitBtn.setOnAction(e -> Platform.exit());
 
-        HBox openBox = new HBox(10, openHtmlBtn, openPdfBtn, openWarningLogBtn, openRstcheckLogBtn, quitBtn);
+        HBox openBox = new HBox(10, quitBtn);
 
-        root.getChildren().addAll(
-            mainContent,
-            terminalArea,
-            openBox
-        );
+        VBox body = new VBox(10, mainContent, terminalArea, debugPane, openBox);
+        body.setPadding(new Insets(10));
+
+        root.getChildren().addAll(header, body);
+    }
+
+    private void refreshDebugButtons() {
+        String dir = directoryField.getText();
+        openWarningLogBtn.setDisable(!isNonEmpty(dir, "warning.log"));
+        openRstcheckLogBtn.setDisable(!isNonEmpty(dir, "rstcheck.log"));
+    }
+
+    private boolean isNonEmpty(String dir, String relativePath) {
+        if (dir == null || dir.isEmpty()) return false;
+        File f = new File(dir, relativePath);
+        return f.exists() && f.length() > 0;
     }
 
     private void chooseDirectory() {
         DirectoryChooser chooser = new DirectoryChooser();
+        chooser.setTitle(this.getMessages().getString("changeDocumentationDirectoryButton"));
         File dir = chooser.showDialog(stage);
         if (dir != null) {
             directoryField.setText(dir.getAbsolutePath());
@@ -206,6 +234,7 @@ public class Controller {
 
     private void chooseTemplateDirectory() {
         DirectoryChooser chooser = new DirectoryChooser();
+        chooser.setTitle(this.getMessages().getString("changeTemplateFolderButton"));
         File dir = chooser.showDialog(stage);
         if (dir != null) {
             templateDirectoryField.setText(dir.getAbsolutePath());
@@ -242,7 +271,7 @@ public class Controller {
 
     private void buildWithTarget(String target) {
         String dir = directoryField.getText();
-        BuildExecutor.executeBuild(dir, target, terminalArea);
+        BuildExecutor.executeBuild(dir, target, terminalArea, this::refreshDebugButtons);
     }
 
     private void openHtmlLocale(String locale) {
@@ -294,68 +323,6 @@ public class Controller {
             }
         }).start();
     }
-
-private void openHtml() {
-    String dir = directoryField.getText();
-    if (dir == null || dir.isEmpty()) {
-        terminalArea.appendText(this.getMessages().getString("selectDocumentationDirectory"));
-        return;
-    }
-
-    new Thread(() -> {
-        try {
-            Path buildDir = Paths.get(dir, "build");
-            java.util.List<Path> targets = Files.walk(buildDir, 3)
-                .filter(p -> p.getFileName().toString().equals("index.html")
-                          && p.getParent().getFileName().toString().equals("html")
-                          && p.getParent().getParent().getFileName().toString().matches("[a-z]{2}"))
-                .collect(java.util.stream.Collectors.toList());
-            if (targets.isEmpty()) {
-                Platform.runLater(() -> terminalArea.appendText(
-                    this.getMessages().getString("fileNotFound") + " build/*/html/index.html\n"));
-                return;
-            }
-            for (Path t : targets)
-                new ProcessBuilder("xdg-open", t.toString())
-                    .redirectErrorStream(true).start().waitFor();
-        } catch (Exception e) {
-            Platform.runLater(() ->
-                    terminalArea.appendText(this.getMessages().getString("errorWebBrowser") + e.getMessage() + "\n"));
-        }
-    }).start();
-}
-
-private void openPdf() {
-    String dir = directoryField.getText();
-    if (dir == null || dir.isEmpty()) {
-        terminalArea.appendText(this.getMessages().getString("selectDocumentationDirectory"));
-        return;
-    }
-
-    new Thread(() -> {
-        try {
-            Path buildDir = Paths.get(dir, "build");
-            java.util.List<Path> targets = Files.walk(buildDir, 3)
-                .filter(p -> p.getFileName().toString().endsWith(".pdf")
-                          && p.getParent().getFileName().toString().equals("latex")
-                          && p.getParent().getParent().getFileName().toString().matches("[a-z]{2}"))
-                .collect(java.util.stream.Collectors.toList());
-            if (targets.isEmpty()) {
-                Platform.runLater(() -> terminalArea.appendText(
-                    this.getMessages().getString("fileNotFound") + " build/*/latex/*.pdf\n"));
-                return;
-            }
-            java.util.List<Process> procs = new java.util.ArrayList<>();
-            for (Path t : targets)
-                procs.add(new ProcessBuilder("xdg-open", t.toString())
-                    .redirectErrorStream(true).start());
-            for (Process p : procs) p.waitFor();
-        } catch (Exception e) {
-            Platform.runLater(() ->
-                    terminalArea.appendText(this.getMessages().getString("errorPDFViewer") + e.getMessage() + "\n"));
-        }
-    }).start();
-}
 
 private void openFileWithDesktop(String relativePath) {
     String dir = directoryField.getText();

@@ -3,7 +3,7 @@
 
     <groupId>org.clem0908</groupId>
     <artifactId>sphinx-build-gui</artifactId>
-    <version>1.2.5</version>
+    <version>1.2.6</version>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
@@ -45,6 +45,9 @@
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>org.clem0908.sphinxbuildgui.Launcher</mainClass>
+                                    <manifestEntries>
+                                        <Implementation-Version>${project.version}</Implementation-Version>
+                                    </manifestEntries>
                                 </transformer>
                             </transformers>
                         </configuration>
@@ -58,7 +61,7 @@
 
     <configuration>
         <name>sphinx-build-gui</name>
-        <appVersion>1.2.5</appVersion>
+        <appVersion>1.2.6</appVersion>
 
         <!-- OBLIGATOIRE -->
         <destination>${project.build.directory}/dist</destination>
