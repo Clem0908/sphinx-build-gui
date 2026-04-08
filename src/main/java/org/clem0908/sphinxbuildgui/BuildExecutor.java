@@ -16,6 +16,7 @@ public class BuildExecutor {
 	ResourceBundle messages = ResourceBundle.getBundle("org.clem0908.sphinxbuildgui.MessagesBundle", currentLocale);
 
         new Thread(() -> {
+            Platform.runLater(terminal::clear);
             try {
                 ProcessBuilder pb = new ProcessBuilder("make", target);
                 pb.directory(new File(dir));

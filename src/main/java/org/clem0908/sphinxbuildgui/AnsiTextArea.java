@@ -29,6 +29,12 @@ public class AnsiTextArea extends ScrollPane {
     /** No-op: AnsiTextArea is always read-only. */
     public void setEditable(boolean editable) {}
 
+    public void clear() {
+        textFlow.getChildren().clear();
+        currentFg = Color.web("#f8f8f2");
+        bold = false;
+    }
+
     public void appendText(String raw) {
         Matcher m = ANSI_PATTERN.matcher(raw);
         int last = 0;
