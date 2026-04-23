@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Sphinx Build GUI
+Name[fr]=Sphinx Build GUI
+Comment=A graphical interface for Sphinx
+Comment[fr]=Une interface graphique pour Sphinx
+Icon=sphinx_build_gui_icon.png
+Exec=java -jar sphinx-build-gui-X.jar
+Terminal=false
+Categories=Development;Building
