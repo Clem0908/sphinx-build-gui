@@ -16,6 +16,8 @@ import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import java.util.prefs.Preferences;
+
 public class Controller {
 
     private VBox root = new VBox(10);
@@ -29,6 +31,11 @@ public class Controller {
     private Button openWarningLogBtn;
     private Button openRstcheckLogBtn;
     private ResourceBundle messages;
+
+    // Gestion des derniers dossiers ouverts
+    private static final String PREF_DOC_DIR = "documentationDirectory";
+    private static final String PREF_TEMPLATE_DIR = "templateDirectory";
+    private final Preferences prefs = Preferences.userNodeForPackage(Controller.class);
 
     private Stage stage;
 
@@ -50,6 +57,10 @@ public class Controller {
 	this.templateDirVersionStatus.setManaged(false);
 
         this.stage = stage;
+
+	directoryField.setText(prefs.get(PREF_DOC_DIR, ""));
+	templateDirectoryField.setText(prefs.get(PREF_TEMPLATE_DIR, ""));
+
         buildUI();
     }
 
@@ -225,19 +236,29 @@ public class Controller {
 
     private void chooseDirectory() {
         DirectoryChooser chooser = new DirectoryChooser();
+	if (prefs.get(PREF_DOC_DIR, "") != "") {
+		File f = new File(prefs.get(PREF_DOC_DIR, ""));
+		chooser.setInitialDirectory(f);
+	}
         chooser.setTitle(this.getMessages().getString("changeDocumentationDirectoryButton"));
         File dir = chooser.showDialog(stage);
         if (dir != null) {
             directoryField.setText(dir.getAbsolutePath());
+	    prefs.put(PREF_DOC_DIR, dir.getAbsolutePath());
         }
     }
 
     private void chooseTemplateDirectory() {
         DirectoryChooser chooser = new DirectoryChooser();
+	if (prefs.get(PREF_TEMPLATE_DIR, "") != "") {
+		File f = new File(prefs.get(PREF_TEMPLATE_DIR, ""));
+		chooser.setInitialDirectory(f);
+	}
         chooser.setTitle(this.getMessages().getString("changeTemplateFolderButton"));
         File dir = chooser.showDialog(stage);
         if (dir != null) {
             templateDirectoryField.setText(dir.getAbsolutePath());
+	    prefs.put(PREF_TEMPLATE_DIR, dir.getAbsolutePath());
         }
     }
 

@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.clem0908</groupId>
   <artifactId>sphinx-build-gui</artifactId>
-  <version>1.2.0</version>
+  <version>1.2.9</version>
   <build>
     <plugins>
       <plugin>
@@ -23,6 +23,9 @@
               <transformers>
                 <transformer>
                   <mainClass>org.clem0908.sphinxbuildgui.Launcher</mainClass>
+                  <manifestEntries>
+                    <Implementation-Version>${project.version}</Implementation-Version>
+                  </manifestEntries>
                 </transformer>
               </transformers>
             </configuration>
@@ -32,10 +35,10 @@
       <plugin>
         <groupId>org.panteleyev</groupId>
         <artifactId>jpackage-maven-plugin</artifactId>
-        <version>1.6.0</version>
+        <version>1.8.0</version>
         <configuration>
           <name>sphinx-build-gui</name>
-          <appVersion>1.2.0</appVersion>
+          <appVersion>1.2.9</appVersion>
           <destination>${project.build.directory}/dist</destination>
           <input>${project.build.directory}</input>
           <mainJar>${project.build.finalName}.jar</mainJar>
@@ -47,8 +50,8 @@
     </plugins>
   </build>
   <properties>
-    <javafx.version>17.0.2</javafx.version>
     <maven.compiler.target>11</maven.compiler.target>
     <maven.compiler.source>11</maven.compiler.source>
+    <javafx.version>17.0.2</javafx.version>
   </properties>
 </project>

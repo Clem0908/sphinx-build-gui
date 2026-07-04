@@ -3,7 +3,7 @@
 
     <groupId>org.clem0908</groupId>
     <artifactId>sphinx-build-gui</artifactId>
-    <version>1.2.8</version>
+    <version>1.2.9</version>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
@@ -57,11 +57,11 @@
 <plugin>
     <groupId>org.panteleyev</groupId>
     <artifactId>jpackage-maven-plugin</artifactId>
-    <version>1.6.0</version>
+    <version>1.8.0</version>
 
     <configuration>
         <name>sphinx-build-gui</name>
-        <appVersion>1.2.8</appVersion>
+        <appVersion>1.2.9</appVersion>
 
         <!-- OBLIGATOIRE -->
         <destination>${project.build.directory}/dist</destination>
