@@ -10,7 +10,7 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) {
         Controller controller = new Controller(stage);
-        Scene scene = new Scene(controller.getRoot(), 1000, 700);
+        Scene scene = new Scene(controller.getRoot(), 1280, 700);
 
         String version = Main.class.getPackage().getImplementationVersion();
         stage.setTitle("Sphinx Build GUI" + (version != null ? " " + version : ""));

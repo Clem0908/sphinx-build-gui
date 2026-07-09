@@ -28,7 +28,6 @@ public class Controller {
     private TextArea templateDirVersionStatus;
     private Button checkVersionBtn;
     private Button checkTemplateDirVersionBtn;
-    private Button openWarningLogBtn;
     private Button openRstcheckLogBtn;
     private ResourceBundle messages;
 
@@ -88,8 +87,10 @@ public class Controller {
         // Documentation directory selection
         Button browseBtn = new Button(this.getMessages().getString("changeDocumentationDirectoryButton"));
         browseBtn.setOnAction(e -> chooseDirectory());
+        browseBtn.setMinWidth(Region.USE_PREF_SIZE);
         directoryField.setPrefWidth(600);
         HBox dirBox = new HBox(10, directoryField, browseBtn);
+        HBox.setHgrow(directoryField, Priority.ALWAYS);
 
         // Documentation template check
         checkVersionBtn = new Button(this.getMessages().getString("checkTemplateButton"));
@@ -98,8 +99,10 @@ public class Controller {
         // Template directory selection
         Button browseTemplateBtn = new Button(this.getMessages().getString("changeTemplateFolderButton"));
         browseTemplateBtn.setOnAction(e -> chooseTemplateDirectory());
+        browseTemplateBtn.setMinWidth(Region.USE_PREF_SIZE);
         templateDirectoryField.setPrefWidth(600);
         HBox templateDirBox = new HBox(10, templateDirectoryField, browseTemplateBtn);
+        HBox.setHgrow(templateDirectoryField, Priority.ALWAYS);
 
         // Template directory version check
         checkTemplateDirVersionBtn = new Button(this.getMessages().getString("checkTemplateFolderVersionButton"));
@@ -143,6 +146,21 @@ public class Controller {
         TitledPane frPane = new TitledPane(this.getMessages().getString("zoneFrTitle"), frContent);
         frPane.setCollapsible(false);
 
+        // Zone Debugging FR
+        Button openWarningHtmlFrLogBtn = new Button(this.getMessages().getString("openWarningHtmlFrLog"));
+        openWarningHtmlFrLogBtn.setOnAction(e -> makeAndOpenWarningLog("warning-html-fr.log"));
+
+        Button openWarningPdfFrLogBtn = new Button(this.getMessages().getString("openWarningPdfFrLog"));
+        openWarningPdfFrLogBtn.setOnAction(e -> makeAndOpenWarningLog("warning-pdf-fr.log"));
+
+        openRstcheckLogBtn = new Button(this.getMessages().getString("openRstcheckLog"));
+        openRstcheckLogBtn.setOnAction(e -> openFileWithDesktop("rstcheck.log"));
+        openRstcheckLogBtn.setDisable(true);
+
+        VBox frDebugContent = new VBox(6, openWarningHtmlFrLogBtn, openWarningPdfFrLogBtn, openRstcheckLogBtn);
+        TitledPane frDebugPane = new TitledPane(this.getMessages().getString("zoneDebugTitle"), frDebugContent);
+        frDebugPane.setCollapsible(false);
+
         // Zone PO/POT: pot, po
         ToggleGroup poGroup = new ToggleGroup();
         RadioButton poPot = new RadioButton("pot");
@@ -163,6 +181,17 @@ public class Controller {
         );
         TitledPane poPane = new TitledPane(this.getMessages().getString("zonePoTitle"), poContent);
         poPane.setCollapsible(false);
+
+        // Zone Debugging PO/POT
+        Button openWarningPotLogBtn = new Button(this.getMessages().getString("openWarningPotLog"));
+        openWarningPotLogBtn.setOnAction(e -> makeAndOpenWarningLog("warning-pot.log"));
+
+        Button checkPoBtn = new Button(this.getMessages().getString("checkPoButton"));
+        checkPoBtn.setOnAction(e -> buildWithTarget("check-po"));
+
+        VBox poDebugContent = new VBox(6, openWarningPotLogBtn, checkPoBtn);
+        TitledPane poDebugPane = new TitledPane(this.getMessages().getString("zoneDebugTitle"), poDebugContent);
+        poDebugPane.setCollapsible(false);
 
         // Zone EN: html-en, pdf-en, pdf-en-fast
         ToggleGroup enGroup = new ToggleGroup();
@@ -189,7 +218,33 @@ public class Controller {
         TitledPane enPane = new TitledPane(this.getMessages().getString("zoneEnTitle"), enContent);
         enPane.setCollapsible(false);
 
-        VBox rightBox = new VBox(10, frPane, poPane, enPane);
+        // Zone Debugging EN
+        Button openWarningHtmlEnLogBtn = new Button(this.getMessages().getString("openWarningHtmlEnLog"));
+        openWarningHtmlEnLogBtn.setOnAction(e -> makeAndOpenWarningLog("warning-html-en.log"));
+
+        Button openWarningPdfEnLogBtn = new Button(this.getMessages().getString("openWarningPdfEnLog"));
+        openWarningPdfEnLogBtn.setOnAction(e -> makeAndOpenWarningLog("warning-pdf-en.log"));
+
+        VBox enDebugContent = new VBox(6, openWarningHtmlEnLogBtn, openWarningPdfEnLogBtn);
+        TitledPane enDebugPane = new TitledPane(this.getMessages().getString("zoneDebugTitle"), enDebugContent);
+        enDebugPane.setCollapsible(false);
+
+        // Right column: publication panes (col 0) + debug panes (col 1), aligned per row
+        GridPane rightBox = new GridPane();
+        rightBox.setHgap(10);
+        rightBox.setVgap(10);
+        frPane.setMaxWidth(Double.MAX_VALUE);
+        poPane.setMaxWidth(Double.MAX_VALUE);
+        enPane.setMaxWidth(Double.MAX_VALUE);
+        frDebugPane.setMaxWidth(Double.MAX_VALUE);
+        poDebugPane.setMaxWidth(Double.MAX_VALUE);
+        enDebugPane.setMaxWidth(Double.MAX_VALUE);
+        rightBox.add(frPane, 0, 0);
+        rightBox.add(frDebugPane, 1, 0);
+        rightBox.add(poPane, 0, 1);
+        rightBox.add(poDebugPane, 1, 1);
+        rightBox.add(enPane, 0, 2);
+        rightBox.add(enDebugPane, 1, 2);
 
         HBox mainContent = new HBox(20, leftBox, rightBox);
 
@@ -197,26 +252,13 @@ public class Controller {
         terminalArea.setEditable(false);
         terminalArea.setPrefHeight(350);
 
-        // Zone Debugging
-        openWarningLogBtn = new Button(this.getMessages().getString("openWarningLog"));
-        openWarningLogBtn.setOnAction(e -> openFileWithDesktop("warning.log"));
-        openWarningLogBtn.setDisable(true);
-
-        openRstcheckLogBtn = new Button(this.getMessages().getString("openRstcheckLog"));
-        openRstcheckLogBtn.setOnAction(e -> openFileWithDesktop("rstcheck.log"));
-        openRstcheckLogBtn.setDisable(true);
-
-        VBox debugContent = new VBox(6, new HBox(10, openWarningLogBtn, openRstcheckLogBtn));
-        TitledPane debugPane = new TitledPane(this.getMessages().getString("zoneDebugTitle"), debugContent);
-        debugPane.setCollapsible(false);
-
         // Bottom bar
         Button quitBtn = new Button(this.getMessages().getString("exit"));
         quitBtn.setOnAction(e -> Platform.exit());
 
         HBox openBox = new HBox(10, quitBtn);
 
-        VBox body = new VBox(10, mainContent, terminalArea, debugPane, openBox);
+        VBox body = new VBox(10, mainContent, terminalArea, openBox);
         body.setPadding(new Insets(10));
 
         root.getChildren().addAll(header, body);
@@ -224,7 +266,6 @@ public class Controller {
 
     private void refreshDebugButtons() {
         String dir = directoryField.getText();
-        openWarningLogBtn.setDisable(!isNonEmpty(dir, "warning.log"));
         openRstcheckLogBtn.setDisable(!isNonEmpty(dir, "rstcheck.log"));
     }
 
@@ -236,9 +277,9 @@ public class Controller {
 
     private void chooseDirectory() {
         DirectoryChooser chooser = new DirectoryChooser();
-	if (prefs.get(PREF_DOC_DIR, "") != "") {
+	if (!prefs.get(PREF_DOC_DIR, "").isEmpty()) {
 		File f = new File(prefs.get(PREF_DOC_DIR, ""));
-		chooser.setInitialDirectory(f);
+		if (f.isDirectory()) chooser.setInitialDirectory(f);
 	}
         chooser.setTitle(this.getMessages().getString("changeDocumentationDirectoryButton"));
         File dir = chooser.showDialog(stage);
@@ -250,9 +291,9 @@ public class Controller {
 
     private void chooseTemplateDirectory() {
         DirectoryChooser chooser = new DirectoryChooser();
-	if (prefs.get(PREF_TEMPLATE_DIR, "") != "") {
+	if (!prefs.get(PREF_TEMPLATE_DIR, "").isEmpty()) {
 		File f = new File(prefs.get(PREF_TEMPLATE_DIR, ""));
-		chooser.setInitialDirectory(f);
+		if (f.isDirectory()) chooser.setInitialDirectory(f);
 	}
         chooser.setTitle(this.getMessages().getString("changeTemplateFolderButton"));
         File dir = chooser.showDialog(stage);
@@ -293,6 +334,18 @@ public class Controller {
     private void buildWithTarget(String target) {
         String dir = directoryField.getText();
         BuildExecutor.executeBuild(dir, target, terminalArea, this::refreshDebugButtons);
+    }
+
+    private void makeAndOpenWarningLog(String logName) {
+        String dir = directoryField.getText();
+        if (dir == null || dir.isEmpty()) {
+            terminalArea.appendText(this.getMessages().getString("selectDocumentationDirectory"));
+            return;
+        }
+        BuildExecutor.executeBuild(dir, logName, terminalArea, () -> {
+            refreshDebugButtons();
+            openFileWithDesktop(logName);
+        });
     }
 
     private void openHtmlLocale(String locale) {

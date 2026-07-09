@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.clem0908</groupId>
   <artifactId>sphinx-build-gui</artifactId>
-  <version>1.2.9</version>
+  <version>1.3.0</version>
   <build>
     <plugins>
       <plugin>
@@ -38,9 +38,9 @@
         <version>1.8.0</version>
         <configuration>
           <name>sphinx-build-gui</name>
-          <appVersion>1.2.9</appVersion>
-          <destination>${project.build.directory}/dist</destination>
-          <input>${project.build.directory}</input>
+          <appVersion>1.3.0</appVersion>
+          <destination>${project.build.directory}/jpackage</destination>
+          <input>${project.build.directory}/jar</input>
           <mainJar>${project.build.finalName}.jar</mainJar>
           <mainClass>org.clem0908.sphinxbuildgui.Launcher</mainClass>
           <type>APP_IMAGE</type>

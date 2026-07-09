@@ -1,9 +1,11 @@
-# Build
+# Sphinx Build GUI
+
+## Build
 ```bash
 make build
 ```
 
-# Run
+## Run
 ```bash
 make run
 ```
